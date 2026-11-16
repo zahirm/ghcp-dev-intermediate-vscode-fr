@@ -1,4 +1,4 @@
-## .NET / Visual Studio
+## .NET
 bin/
 obj/
 [Dd]ebug/
@@ -14,7 +14,7 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
-## Visual Studio cache/options
+## Visual Studio cache/options (si la solution est aussi ouverte dans Visual Studio)
 .vs/
 *.user
 *.suo

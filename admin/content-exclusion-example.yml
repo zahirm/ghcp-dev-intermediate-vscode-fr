@@ -18,6 +18,6 @@
 
 # Notes pour la démo :
 # - Les exclusions bloquent les suggestions en ligne ET le contexte du chat pour les fichiers correspondants.
-# - Les changements peuvent prendre jusqu'à ~30 minutes pour se propager, ou rechargez la fenêtre pour forcer un rafraîchissement.
+# - Les changements peuvent prendre jusqu'à ~30 minutes pour se propager, ou rechargez la fenêtre VS Code (Developer: Reload Window) pour forcer un rafraîchissement.
 # - Les exclusions sont appliquées à Copilot dans les IDE et, là où c'est pris en charge, sur github.com.
 # - Les exclusions ne suppriment PAS rétroactivement ce qui a déjà été suggéré ou validé.

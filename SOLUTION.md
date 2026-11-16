@@ -2,7 +2,7 @@
 
 Ce document explique ce qu'est la solution, comment ses éléments s'articulent et où se
 trouvent les **défauts intentionnels**. L'ensemble du kit existe pour donner à GitHub Copilot un vrai
-travail à accomplir pendant les démos (`/fix`, `/tests`, revue, refactorisation, modernisation).
+travail à accomplir pendant les démos dans VS Code (correction, tests, revue, refactorisation, modernisation).
 
 ---
 
@@ -80,11 +80,11 @@ dotnet test
 
 | Où | Défaut | Le corriger avec |
 | --- | --- | --- |
-| `Cart.Subtotal` | Décalage d'un cran (`<=`) | `/fix`, chat en ligne |
-| `Cart.Checkout` | Journalise le numéro de carte | Revue de sécurité |
-| `Cart` / `CartItem` | Monnaie en `double` | Copilot Edits (centimes) |
+| `Cart.Subtotal` | Décalage d'un cran (`<=`) | Chat en ligne (`Ctrl+I`), vue Chat |
+| `Cart.Checkout` | Journalise le numéro de carte | Clic droit > **Review**, skill `/security-review` |
+| `Cart` / `CartItem` | Monnaie en `double` | Mode Agent, modifications multi-fichiers (centimes) |
 | `InventoryLegacy` | Injection SQL | Refactoriser vers `SqliteParameter` |
-| les deux modules | Documentation XML manquante | `/doc`, moderniser |
-| `ShoppingCart.Tests` | Presque aucun test | `/tests`, mode agent |
+| les deux modules | Documentation XML manquante | Chat en ligne, mode Agent (moderniser) |
+| `ShoppingCart.Tests` | Presque aucun test | Skill `/unit-tests`, mode Agent |
 
 > Chaque problème ci-dessus est intentionnel — le kit est un terrain d'entraînement, pas du code de production.

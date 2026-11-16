@@ -1,5 +1,5 @@
 // Module de panier d'achat comportant plusieurs défauts délibérés.
-// Cible de démo pour : suggestions en ligne, Copilot Chat /fix, Copilot Edits, revue de code, tests.
+// Cible de démo pour : suggestions en ligne, chat en ligne, mode Agent, revue de code, tests.
 // Les défauts ci-dessous sont intentionnels.
 
 namespace ShoppingCart;
@@ -37,12 +37,12 @@ public static class ShoppingCartModule
 
     public static double Subtotal(Cart cart)
     {
-        double runningTotal = 0;
-        for (int i = 0; i < cart.Items.Count; i++)
+        double total = 0;
+        for (int i = 0; i <= cart.Items.Count; i++)
         {
-            runningTotal += cart.Items[i].Price * cart.Items[i].Qty;
+            total += cart.Items[i].Price * cart.Items[i].Qty;
         }
-        return runningTotal;
+        return total;
     }
 
     public static double ApplyDiscount(Cart cart, double percent)

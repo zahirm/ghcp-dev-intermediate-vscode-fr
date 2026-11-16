@@ -7,9 +7,9 @@
     "scminput": false
   },
   "github.copilot.nextEditSuggestions.enabled": true,
-  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
-  "chat.promptFiles": true,
-  "chat.agent.enabled": true,
-  "editor.inlineSuggest.enabled": true,
-  "github.copilot.chat.reviewSelection.enabled": true
+  "github.copilot.chat.reviewSelection.enabled": true,
+  "github.copilot.chat.reviewSelection.instructions": [
+    { "file": ".github/copilot-instructions.md" }
+  ],
+  "chat.agentHost.cloudSandbox.enabled": true
 }
