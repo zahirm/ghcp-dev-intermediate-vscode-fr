@@ -24,7 +24,10 @@ CopilotDemoKit.sln
 ├─ .github/
 │  ├─ copilot-instructions.md
 │  ├─ instructions/csharp.instructions.md
-│  └─ skills/{security-review,unit-tests}/SKILL.md
+│  ├─ skills/{security-review,unit-tests}/SKILL.md
+│  └─ workflows/workshop-site.yml  vérifie que docs/index.html est à jour
+├─ docs/index.html         guide d'atelier publié par GitHub Pages (généré depuis ce README)
+├─ tools/workshop-site/    générateur du guide d'atelier
 ├─ .vscode/{settings.json,extensions.json}
 ├─ .mcp.json               serveurs MCP partagés avec l'espace de travail
 ├─ admin/content-exclusion-example.yml
@@ -69,12 +72,30 @@ dotnet test
 | `.vscode/extensions.json` | Extensions recommandées (Copilot Chat, C# Dev Kit) |
 | `.mcp.json` | Serveurs MCP de l'espace de travail (GitHub, Microsoft Learn) au format portable `mcpServers` |
 | `admin/content-exclusion-example.yml` | Syntaxe d'exclusion de contenu |
+| `tools/workshop-site/build.mjs` | Génère le guide d'atelier `docs/index.html` (GitHub Pages) à partir de ce README |
 
 > [!NOTE]
 > **Héritage :** les fichiers de prompt (`.github/prompts/*.prompt.md`) et `.vscode/mcp.json` (clé `servers`) ne fonctionnent
 > qu'avec le harnais **Local** de VS Code, déprécié et retiré d'ici février 2027. Ce kit utilise leurs remplaçants :
 > les **skills** (`.github/skills/`) et le fichier `.mcp.json` à la racine. La commande **Chat: Open Customizations** > **Migrations**
 > convertit d'anciens fichiers de prompt en skills.
+
+---
+
+## 🌐 Guide d'atelier en ligne
+
+Les participants suivent l'atelier sur une version web de ce README, publiée avec GitHub Pages :
+<https://zahirm.github.io/ghcp-dev-intermediate-vscode-fr/>.
+
+- **Publication :** **Settings** > **Pages** > **Build and deployment** > **Deploy from a branch**, branche `main`, dossier `/docs`.
+- **Source de vérité :** ce README. Le fichier `docs/index.html` est généré ; ne le modifiez pas à la main.
+- **Après toute modification du README**, régénérez la page (Node.js 18 ou plus récent, aucune dépendance à installer) et validez `docs/index.html` avec le README :
+
+  ```powershell
+  node tools/workshop-site/build.mjs
+  ```
+
+  Le workflow `.github/workflows/workshop-site.yml` échoue si la page n'est pas à jour.
 
 ---
 

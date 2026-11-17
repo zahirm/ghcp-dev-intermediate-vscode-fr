@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Cahier d’atelier GitHub Copilot Dev Intermediate — édition .NET 8.">
+<title>Cahier d’atelier · GitHub Copilot Dev Intermediate</title>
+<script>
+  (() => {
+    let theme = null;
+    let projection = false;
+    try {
+      theme = localStorage.getItem('page-theme');
+      projection = JSON.parse(localStorage.getItem('gh300-companion') || '{}').projection === true;
+    } catch {}
+    const root = document.documentElement;
+    root.dataset.theme = theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    root.classList.toggle('projection', projection);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #f1f0ea;
+  --ink: #1c1d21;
+  --muted: #5b5d66;
+  --faint: #8a8c94;
+  --border: #e3e1d9;
+  --border-strong: #cfccc1;
+  --accent: #6e40c9;
+  --accent-hover: #5a2fb3;
+  --accent-soft: #efe9fb;
+  --on-accent: #ffffff;
+  --ok: #1a7f37;
+  --ok-soft: #dcf5e3;
+  --note-ink: #6b4300;
+  --note-soft: #fdf3dc;
+  --shadow: 0 1px 2px rgb(28 29 33 / 5%), 0 6px 20px -12px rgb(28 29 33 / 18%);
+  --bar-bg: rgb(247 246 242 / 86%);
+  --sans: "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Cascadia Code", ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --bar-h: 3.5rem;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111214;
+  --surface: #18191c;
+  --surface-2: #202226;
+  --ink: #ecebe6;
+  --muted: #a7a8ae;
+  --faint: #7d7f86;
+  --border: #2b2d32;
+  --border-strong: #3b3e44;
+  --accent: #b392f0;
+  --accent-hover: #c8b0f5;
+  --accent-soft: #2a2240;
+  --on-accent: #111214;
+  --ok: #4ac26b;
+  --ok-soft: #13301d;
+  --note-ink: #f2cc60;
+  --note-soft: #2b2309;
+  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px -14px rgb(0 0 0 / 60%);
+  --bar-bg: rgb(17 18 20 / 86%);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; color: var(--ink); background: var(--bg); font: 1rem/1.65 var(--sans); overflow-wrap: anywhere; -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-underline-offset: .18em; text-decoration-thickness: 1px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+button { font: inherit; color: inherit; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: 1rem; top: -4rem; z-index: 60; padding: .5rem .9rem; border-radius: 8px; background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.skip:focus { top: .6rem; }
+.i { width: 1em; height: 1em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+code, kbd, pre { font-family: var(--mono); font-variant-ligatures: none; }
+code { font-size: .86em; padding: .12em .38em; border-radius: 5px; background: var(--surface-2); border: 1px solid var(--border); }
+code.file { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+.keys { white-space: nowrap; color: var(--faint); }
+kbd { display: inline-block; min-width: 1.6em; padding: .05em .4em; border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 5px; background: var(--surface); color: var(--ink); font-size: .78em; line-height: 1.5; text-align: center; }
+.eyebrow { margin: 0; color: var(--muted); font-size: .74rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+
+/* ---------- Top bar with the agenda strip (doubles as progress) ---------- */
+.bar { position: sticky; top: 0; z-index: 40; height: var(--bar-h); display: flex; align-items: center; gap: 1.25rem; padding: 0 clamp(.75rem, 3vw, 1.75rem); background: var(--bar-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.brand { display: flex; align-items: center; gap: .6rem; color: var(--ink); font-weight: 650; font-size: .92rem; text-decoration: none; white-space: nowrap; }
+.brand-mark { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; border-radius: 7px; background: var(--ink); color: var(--bg); font: 700 .7rem/1 var(--mono); }
+.agenda { flex: 1; min-width: 0; display: flex; align-items: center; gap: .9rem; }
+.strip { flex: 1; min-width: 0; display: flex; gap: 3px; margin: 0; padding: 0; list-style: none; }
+.strip li { min-width: 6px; }
+.strip .strip-gap { flex: 0 0 8px; min-width: 0; }
+.strip a { display: block; height: 1.75rem; position: relative; }
+.strip a::before { content: ""; position: absolute; inset: auto 0 calc(50% - 3px); height: 6px; border-radius: 3px; background: var(--border-strong); transition: background-color 200ms ease, transform 160ms var(--ease-out); }
+.strip a[data-done]::before { background: var(--ok); }
+.strip a[aria-current]::before { background: var(--accent); transform: scaleY(1.5); }
+.strip a[aria-current][data-done]::before { background: var(--ok); }
+.count { flex: none; color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.count strong { color: var(--ink); font-weight: 650; }
+.tools { flex: none; display: flex; align-items: center; gap: .4rem; }
+.tool, .seg button { display: inline-grid; place-items: center; height: 2rem; min-width: 2rem; padding: 0 .5rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--muted); cursor: pointer; transition: transform 140ms var(--ease-out), background-color 160ms ease, color 160ms ease; }
+.tool { grid-auto-flow: column; gap: .4rem; font-size: .8rem; }
+.tool[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.seg { display: inline-flex; padding: 2px; gap: 2px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); }
+.seg button { height: 1.75rem; min-width: 1.75rem; padding: 0; border: 0; background: transparent; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / 12%); }
+.tool:active, .seg button:active, .copy-btn:active, .done-btn:active, .inline-prompt:active { transform: scale(.97); }
+@media (hover: hover) and (pointer: fine) {
+  .tool:hover, .seg button:hover { color: var(--ink); }
+}
+
+/* ---------- Layout ---------- */
+.shell { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); max-width: 76rem; margin: 0 auto; padding: 0 clamp(1rem, 3vw, 2rem); }
+.rail { position: sticky; top: var(--bar-h); align-self: start; max-height: calc(100vh - var(--bar-h)); overflow-y: auto; padding: 2rem 0 2rem; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+.rail > a { display: block; padding: .35rem .5rem; border-radius: 7px; color: var(--muted); font-size: .84rem; text-decoration: none; }
+.rail-part { margin: 1.1rem .5rem .3rem; color: var(--faint); font-size: .68rem; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; }
+.rail ol { margin: 0; padding: 0; list-style: none; }
+.rail ol a { display: grid; grid-template-columns: 1.7rem minmax(0, 1fr) auto; align-items: baseline; gap: .35rem; padding: .32rem .5rem; border-radius: 7px; color: var(--muted); font-size: .84rem; line-height: 1.35; text-decoration: none; }
+.rail a[aria-current] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.rail-num { position: relative; font: 500 .74rem/1 var(--mono); color: var(--faint); }
+.rail-num .i { position: absolute; left: 0; top: -.1em; width: 1rem; height: 1rem; color: var(--ok); stroke-width: 2; opacity: 0; transform: scale(.6); transition: opacity 160ms ease, transform 160ms var(--ease-out); }
+.rail-num .n { transition: opacity 120ms ease; }
+.rail a[data-done] .rail-num .i { opacity: 1; transform: none; }
+.rail a[data-done] .rail-num .n { opacity: 0; }
+.rail-min { color: var(--faint); font-size: .72rem; font-variant-numeric: tabular-nums; }
+.rail-hint { margin: 1.5rem .5rem 0; color: var(--faint); font-size: .74rem; }
+@media (hover: hover) and (pointer: fine) {
+  .rail a:hover { color: var(--ink); }
+}
+main { min-width: 0; max-width: 48rem; padding: 2.75rem 0 6rem; }
+
+/* ---------- Intro ---------- */
+.intro h1 { margin: .6rem 0 1rem; font-size: clamp(1.9rem, 4.2vw, 2.7rem); line-height: 1.12; letter-spacing: -.025em; font-weight: 680; text-wrap: balance; }
+.intro .lede > p:first-child { margin-top: 0; font-size: 1.08rem; color: var(--muted); }
+.intro .lede ul { padding-left: 1.1rem; color: var(--muted); font-size: .94rem; }
+.intro .lede li { margin: .3rem 0; }
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 2rem 0 0; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); overflow: hidden; }
+.facts div { padding: .85rem 1rem; border-left: 1px solid var(--border); }
+.facts div:first-child { border-left: 0; }
+.facts dt { color: var(--faint); font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.facts dd { margin: .15rem 0 0; font-weight: 650; font-variant-numeric: tabular-nums; }
+
+/* ---------- Preparation ---------- */
+.prep { margin-top: 3rem; scroll-margin-top: calc(var(--bar-h) + 1rem); }
+.prep h2, .annex h2 { margin: .35rem 0 1rem; font-size: 1.35rem; letter-spacing: -.01em; }
+.prep-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; }
+.panel { padding: 1.1rem 1.2rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); }
+.panel h3 { margin: 0 0 .75rem; font-size: .95rem; }
+.checklist { margin: 0; padding: 0; list-style: none; display: grid; gap: .6rem; font-size: .88rem; color: var(--muted); }
+.check { display: grid; grid-template-columns: 1.15rem minmax(0, 1fr); gap: .6rem; cursor: pointer; }
+.check input { position: absolute; opacity: 0; pointer-events: none; }
+.check-box { display: grid; place-items: center; width: 1.15rem; height: 1.15rem; margin-top: .2rem; border: 1.5px solid var(--border-strong); border-radius: 5px; background: var(--surface); transition: background-color 150ms ease, border-color 150ms ease; }
+.check-box .i { width: .8rem; height: .8rem; stroke-width: 2.4; color: var(--on-accent); opacity: 0; transform: scale(.6); transition: opacity 150ms ease, transform 150ms var(--ease-out); }
+.check input:checked + .check-box { background: var(--ok); border-color: var(--ok); }
+.check input:checked + .check-box .i { opacity: 1; transform: none; }
+.check input:focus-visible + .check-box { outline: 2px solid var(--accent); outline-offset: 2px; }
+.panel > p { margin: .8rem 0 0; font-size: .86rem; color: var(--muted); }
+
+/* ---------- Parts and demos ---------- */
+.part { margin-top: 4rem; }
+.part-head { display: flex; align-items: center; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.part-letter { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; flex: none; margin: 0; border-radius: 10px; background: var(--ink); color: var(--bg); font: 700 1.2rem/1 var(--mono); }
+.part-head h2 { margin: .15rem 0 0; font-size: 1.45rem; letter-spacing: -.015em; line-height: 1.25; }
+.demo { padding: 2.25rem 0 1.5rem; border-bottom: 1px solid var(--border); scroll-margin-top: var(--bar-h); }
+.demo-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 1rem; }
+.demo-num { width: 3.25rem; font: 300 2.6rem/1 var(--mono); color: var(--border-strong); letter-spacing: -.04em; font-variant-numeric: tabular-nums; transition: color 200ms ease; }
+.demo[data-done] .demo-num { color: var(--ok); }
+.demo-titles h3 { margin: .2rem 0 0; font-size: 1.3rem; line-height: 1.3; letter-spacing: -.01em; }
+.demo-titles h3:focus { outline: none; }
+.done-btn { display: inline-flex; align-items: center; gap: .5rem; height: 2.1rem; padding: 0 .8rem 0 .55rem; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: .82rem; font-weight: 600; cursor: pointer; transition: transform 140ms var(--ease-out), background-color 160ms ease, color 160ms ease, border-color 160ms ease; }
+.done-box { display: grid; place-items: center; width: 1.1rem; height: 1.1rem; border: 1.5px solid var(--border-strong); border-radius: 50%; transition: background-color 160ms ease, border-color 160ms ease; }
+.done-box .i { width: .72rem; height: .72rem; stroke-width: 2.6; color: var(--on-accent); opacity: 0; transform: scale(.6); transition: opacity 160ms ease, transform 160ms var(--ease-out); }
+.done-btn[aria-pressed="true"] { background: var(--ok-soft); border-color: transparent; color: var(--ok); }
+.done-btn[aria-pressed="true"] .done-box { background: var(--ok); border-color: var(--ok); }
+.done-btn[aria-pressed="true"] .done-box .i { opacity: 1; transform: none; }
+@media (hover: hover) and (pointer: fine) {
+  .done-btn:hover { border-color: var(--border-strong); color: var(--ink); }
+  .done-btn[aria-pressed="true"]:hover { color: var(--ok); }
+}
+
+.demo-body { margin: 1.5rem 0 0 4.25rem; font-size: .97rem; }
+.demo-body > ul { list-style: none; margin: 0; padding: 0; counter-reset: step; }
+.demo-body > ul > li { counter-increment: step; position: relative; padding: 0 0 1.35rem 2.3rem; }
+.demo-body > ul > li::before { content: counter(step); position: absolute; left: 0; top: .15rem; display: grid; place-items: center; width: 1.55rem; height: 1.55rem; border: 1px solid var(--border-strong); border-radius: 50%; background: var(--bg); color: var(--muted); font: 600 .72rem/1 var(--mono); }
+.demo-body > ul > li:not(:last-child)::after { content: ""; position: absolute; left: calc(.775rem - .5px); top: 1.95rem; bottom: .25rem; width: 1px; background: var(--border); }
+.demo-body li > p { margin: 0 0 .6rem; }
+.demo-body ul ul { margin: .5rem 0 .2rem; padding-left: 1.1rem; }
+.demo-body ul ul li { margin: .35rem 0; }
+.demo-body ul ul li::marker { color: var(--faint); }
+
+.prompt, .codeblock { margin: .75rem 0 .9rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.prompt { border-left: 3px solid var(--accent); }
+.prompt figcaption, .codeblock figcaption { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .35rem .4rem .35rem .85rem; border-bottom: 1px solid var(--border); color: var(--faint); font-size: .7rem; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+.prompt blockquote { margin: 0; padding: .8rem .95rem .9rem; font-size: 1rem; line-height: 1.55; }
+.prompt blockquote p { margin: 0; }
+.codeblock pre { margin: 0; padding: .85rem .95rem; overflow-x: auto; background: var(--surface-2); font-size: .84rem; line-height: 1.6; }
+.codeblock pre code { padding: 0; border: 0; background: none; font-size: inherit; }
+.copy-btn { position: relative; display: inline-grid; height: 1.75rem; padding: 0 .55rem; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--muted); font-size: .76rem; font-weight: 600; letter-spacing: 0; text-transform: none; cursor: pointer; transition: transform 140ms var(--ease-out), background-color 160ms ease; }
+.copy-btn > span { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: .35rem; transition: opacity 150ms ease, filter 150ms ease, transform 150ms var(--ease-out); }
+.copy-done { color: var(--ok); opacity: 0; filter: blur(2px); transform: scale(.9); }
+.copy-btn[data-copied] .copy-idle { opacity: 0; filter: blur(2px); transform: scale(.9); }
+.copy-btn[data-copied] .copy-done { opacity: 1; filter: none; transform: none; }
+@media (hover: hover) and (pointer: fine) {
+  .copy-btn:hover { background: var(--surface-2); color: var(--ink); }
+}
+.inline-prompt { display: inline-flex; align-items: center; gap: .35rem; max-width: 100%; margin: 0; padding: .1rem .45rem .1rem .1rem; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--muted); text-align: left; cursor: copy; vertical-align: baseline; transition: transform 140ms var(--ease-out), border-color 160ms ease, color 160ms ease; }
+.inline-prompt code { border: 0; background: transparent; color: var(--ink); font-family: var(--sans); font-size: .92em; white-space: normal; }
+.inline-prompt .i { opacity: .7; }
+.inline-prompt[data-copied] { border-color: var(--ok); color: var(--ok); }
+@media (hover: hover) and (pointer: fine) {
+  .inline-prompt:hover { border-color: var(--accent); color: var(--accent); }
+}
+
+.takeaway, .note { margin: .4rem 0 0; padding: .9rem 1.05rem; border-radius: 10px; font-size: .92rem; }
+.takeaway { background: var(--accent-soft); }
+.note { background: var(--note-soft); }
+.takeaway p, .note p { margin: 0; }
+.takeaway p + p, .note p + p { margin-top: .5rem; }
+.callout-label { margin-bottom: .3rem !important; color: var(--accent); font-size: .7rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.note .callout-label { color: var(--note-ink); }
+.demo-foot { display: flex; justify-content: flex-end; margin-top: 1.5rem; }
+.next { display: inline-flex; align-items: center; gap: .6rem; padding: .5rem .75rem; border-radius: 9px; color: var(--muted); font-size: .84rem; text-decoration: none; }
+.next strong { color: var(--ink); font-weight: 600; }
+.next .i { color: var(--accent); }
+@media (hover: hover) and (pointer: fine) {
+  .next:hover { background: var(--surface); }
+}
+
+/* ---------- Annex ---------- */
+.annex { margin-top: 4rem; scroll-margin-top: calc(var(--bar-h) + 1rem); }
+.annex h3 { margin: 2rem 0 .75rem; font-size: 1rem; }
+.table-wrap { position: relative; overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+th, td { padding: .6rem .8rem; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+th { color: var(--faint); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; background: var(--surface-2); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { width: 38%; }
+.annex .note { margin-top: 1rem; }
+
+.toast { position: fixed; left: 50%; bottom: 1.25rem; z-index: 50; padding: .5rem .9rem; border-radius: 9px; background: var(--ink); color: var(--bg); font-size: .84rem; box-shadow: var(--shadow); opacity: 0; transform: translate(-50%, .5rem); pointer-events: none; transition: opacity 180ms ease, transform 220ms var(--ease-out); }
+.toast[data-show] { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- Projection mode: larger type, no rail, for screen sharing ---------- */
+html.projection { font-size: 118%; }
+html.projection .shell { grid-template-columns: minmax(0, 1fr); max-width: 60rem; }
+html.projection .rail { display: none; }
+html.projection main { max-width: none; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .rail { display: none; }
+  main { max-width: none; }
+}
+@media (max-width: 680px) {
+  .brand-text, .tool-label { display: none; }
+  .bar { gap: .75rem; }
+  .agenda { gap: .6rem; }
+  .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .facts div:nth-child(3) { border-left: 0; }
+  .facts div:nth-child(n+3) { border-top: 1px solid var(--border); }
+  .prep-grid { grid-template-columns: minmax(0, 1fr); }
+  .demo-head { grid-template-columns: minmax(0, 1fr) auto; }
+  .demo-num { display: none; }
+  .demo-body { margin-left: 0; }
+}
+@media (max-width: 420px) {
+  .count { display: none; }
+  .done-btn { padding: 0 .55rem; font-size: 0; gap: 0; }
+  .done-btn .done-box { width: 1.2rem; height: 1.2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-property: opacity, background-color, color, border-color !important; }
+  .toast { transform: translate(-50%, 0); }
+}
+@media print {
+  :root { color-scheme: light; }
+  .bar, .rail, .done-btn, .copy-btn, .demo-foot, .toast, .skip { display: none !important; }
+  .shell { display: block; max-width: none; }
+  .demo { break-inside: avoid-page; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="bar">
+  <a class="brand" href="#top" aria-label="Haut de page"><span class="brand-mark" aria-hidden="true">GH</span><span class="brand-text">Cahier d’atelier</span></a>
+  <nav class="agenda" aria-label="Agenda de l’atelier">
+    <ol class="strip"><li style="flex-grow:2"><a href="#demo-1" data-nav-demo="1" data-label="Démo 1 : Activer et cadrer Copilot, 2 min" aria-label="Démo 1 : Activer et cadrer Copilot, 2 min" title="1. Activer et cadrer Copilot · 2 min"></a></li><li style="flex-grow:3"><a href="#demo-2" data-nav-demo="2" data-label="Démo 2 : Suggestions en ligne et Next Edit Suggestions, 3 min" aria-label="Démo 2 : Suggestions en ligne et Next Edit Suggestions, 3 min" title="2. Suggestions en ligne et Next Edit Suggestions · 3 min"></a></li><li style="flex-grow:4"><a href="#demo-3" data-nav-demo="3" data-label="Démo 3 : Chat en ligne et vue Chat, 4 min" aria-label="Démo 3 : Chat en ligne et vue Chat, 4 min" title="3. Chat en ligne et vue Chat · 4 min"></a></li><li style="flex-grow:4"><a href="#demo-4" data-nav-demo="4" data-label="Démo 4 : Modifications multi-fichiers en mode Agent, 4 min" aria-label="Démo 4 : Modifications multi-fichiers en mode Agent, 4 min" title="4. Modifications multi-fichiers en mode Agent · 4 min"></a></li><li style="flex-grow:5"><a href="#demo-5" data-nav-demo="5" data-label="Démo 5 : Mode agent de bout en bout, 5 min" aria-label="Démo 5 : Mode agent de bout en bout, 5 min" title="5. Mode agent de bout en bout · 5 min"></a></li><li style="flex-grow:3"><a href="#demo-6" data-nav-demo="6" data-label="Démo 6 : MCP en mode agent, 3 min" aria-label="Démo 6 : MCP en mode agent, 3 min" title="6. MCP en mode agent · 3 min"></a></li><li style="flex-grow:3"><a href="#demo-7" data-nav-demo="7" data-label="Démo 7 : Sessions d&#39;agent, Agents window et délégation, 3 min" aria-label="Démo 7 : Sessions d&#39;agent, Agents window et délégation, 3 min" title="7. Sessions d&#39;agent, Agents window et délégation · 3 min"></a></li><li style="flex-grow:5"><a href="#demo-8" data-nav-demo="8" data-label="Démo 8 : Copilot CLI, 5 min" aria-label="Démo 8 : Copilot CLI, 5 min" title="8. Copilot CLI · 5 min"></a></li><li class="strip-gap" aria-hidden="true"></li><li style="flex-grow:4"><a href="#demo-9" data-nav-demo="9" data-label="Démo 9 : Revue de code et normes de revue personnalisées, 4 min" aria-label="Démo 9 : Revue de code et normes de revue personnalisées, 4 min" title="9. Revue de code et normes de revue personnalisées · 4 min"></a></li><li style="flex-grow:3"><a href="#demo-10" data-nav-demo="10" data-label="Démo 10 : Résumés de PR, Spaces et Spark, 3 min" aria-label="Démo 10 : Résumés de PR, Spaces et Spark, 3 min" title="10. Résumés de PR, Spaces et Spark · 3 min"></a></li></ol>
+    <span class="count"><strong data-minutes-done>0</strong> / 36 min</span>
+  </nav>
+  <div class="tools">
+    <button type="button" class="tool" data-projection aria-pressed="false" title="Mode projection : texte agrandi pour le partage d’écran"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="8.5" rx="1.5"/><path d="M5.5 14h5M8 11v3"/></svg><span class="tool-label">Projection</span></button>
+    <div class="seg" role="group" aria-label="Thème">
+      <button type="button" data-set-theme="light" aria-pressed="true" aria-label="Thème clair"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg></button>
+      <button type="button" data-set-theme="dark" aria-pressed="false" aria-label="Thème sombre"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7z"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<div class="shell" id="top">
+  <nav class="rail" aria-label="Sommaire">
+    <a href="#preparation" data-nav-section="preparation">Avant de commencer</a>
+    
+      <p class="rail-part">Partie A</p>
+      <ol>
+        <li><a href="#demo-1" data-nav-demo="1"><span class="rail-num"><span class="n">01</span><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="rail-title">Activer et cadrer Copilot</span><span class="rail-min">2′</span></a></li>
+        <li><a href="#demo-2" data-nav-demo="2"><span class="rail-num"><span class="n">02</span><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="rail-title">Suggestions en ligne et Next Edit Suggestions</span><span class="rail-min">3′</span></a></li>
+        <li><a href="#demo-3" data-nav-demo="3"><span class="rail-num"><span class="n">03</span><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="rail-title">Chat en ligne et vue Chat</span><span class="rail-min">4′</span></a></li>
+        <li><a href="#demo-4" data-nav-demo="4"><span class="rail-num"><span class="n">04</span><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="rail-title">Modifications multi-fichiers en mode Agent</span><span class="rail-min">4′</span></a></li>
+        <li><a href="#demo-5" data-nav-demo="5"><span class="rail-num"><span class="n">05</span><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="rail-title">Mode agent de bout en bout</span><span class="rail-min">5′</span></a></li>
+        <li><a href="#demo-6" data-nav-demo="6"><span class="rail-num"><span class="n">06</span><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="rail-title">MCP en mode agent</span><span class="rail-min">3′</span></a></li>
+        <li><a href="#demo-7" data-nav-demo="7"><span class="rail-num"><span class="n">07</span><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="rail-title">Sessions d&#39;agent, Agents window et délégation</span><span class="rail-min">3′</span></a></li>
+        <li><a href="#demo-8" data-nav-demo="8"><span class="rail-num"><span class="n">08</span><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="rail-title">Copilot CLI</span><span class="rail-min">5′</span></a></li>
+      </ol>
+      <p class="rail-part">Partie B</p>
+      <ol>
+        <li><a href="#demo-9" data-nav-demo="9"><span class="rail-num"><span class="n">09</span><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="rail-title">Revue de code et normes de revue personnalisées</span><span class="rail-min">4′</span></a></li>
+        <li><a href="#demo-10" data-nav-demo="10"><span class="rail-num"><span class="n">10</span><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="rail-title">Résumés de PR, Spaces et Spark</span><span class="rail-min">3′</span></a></li>
+      </ol>
+    <p class="rail-part">Annexe</p>
+    <a href="#annexe" data-nav-section="annexe">Le kit en détail</a>
+    <p class="rail-hint"><kbd>J</kbd> <kbd>K</kbd> démo suivante / précédente</p>
+  </nav>
+
+  <main id="contenu">
+    <section class="intro" aria-labelledby="titre">
+      <p class="eyebrow">Atelier en direct · 10 démos · 36 min</p>
+      <h1 id="titre">Kit de démo GitHub Copilot Dev Intermediate — édition .NET 8</h1>
+      <div class="lede">
+<p>Un kit compact et autonome pour démontrer les capacités de GitHub Copilot pendant
+la préparation au GH-300.</p>
+<ul>
+<li>Cible <strong>.NET 8 (C#)</strong> et adapté pour <strong>Visual Studio Code</strong> avec <strong>GitHub Copilot</strong> et le <strong>C# Dev Kit</strong>.</li>
+<li>Utilise le harnais <strong>Copilot</strong> de VS Code (sélecteur <strong>Session Target</strong>), les <strong>skills</strong> d&#39;agent et un fichier <code class="file">.mcp.json</code> portable.</li>
+<li>Les deux modules sources sont <strong>volontairement imparfaits</strong> — un bogue de décalage d&#39;un cran, un
+numéro de carte journalisé, une injection SQL, aucune documentation et (presque) aucun test — afin que Copilot ait un vrai
+travail à accomplir lors des démos de correction, de tests, de revue, de refactorisation et de modernisation.</li>
+</ul>
+
+      </div>
+      <dl class="facts">
+        <div><dt>Durée</dt><dd>36 min</dd></div>
+        <div><dt>Démos</dt><dd>10</dd></div>
+        <div><dt>Pile</dt><dd>.NET 8 · C#</dd></div>
+        <div><dt>Outils</dt><dd>VS Code · Copilot</dd></div>
+      </dl>
+    </section>
+
+    <section class="prep" id="preparation" aria-labelledby="prep-title">
+      <p class="eyebrow">Étape 0 · avant le début</p>
+      <h2 id="prep-title">Avant de commencer</h2>
+      <div class="prep-grid">
+        <div class="panel">
+          <h3>Prérequis</h3>
+          <ul class="checklist">
+<li><label class="check"><input type="checkbox" data-prep="0"><span class="check-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span>SDK .NET 8 (<code>dotnet --list-sdks</code> doit afficher un <code>8.0.x</code> ; <code class="file">global.json</code> l&#39;épingle).</span></label></li>
+<li><label class="check"><input type="checkbox" data-prep="1"><span class="check-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span>Visual Studio Code à jour, connecté à un compte GitHub disposant de Copilot.</span></label></li>
+<li><label class="check"><input type="checkbox" data-prep="2"><span class="check-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span>Extensions <strong>GitHub Copilot Chat</strong> et <strong>C# Dev Kit</strong> (VS Code les propose à l&#39;ouverture du dossier via <code class="file">.vscode/extensions.json</code>).</span></label></li>
+<li><label class="check"><input type="checkbox" data-prep="3"><span class="check-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span>Ouvrez le <strong>dossier racine</strong> du dépôt (<code>code .</code>) ; le C# Dev Kit charge <code class="file">CopilotDemoKit.sln</code> dans la vue <strong>Solution Explorer</strong>.</span></label></li>
+<li><label class="check"><input type="checkbox" data-prep="4"><span class="check-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span>Pour la démo 8 : <a href="https://docs.github.com/copilot/how-tos/copilot-cli">GitHub Copilot CLI</a> installé (<code>copilot --version</code>).</span></label></li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Compiler et exécuter</h3>
+<figure class="codeblock"><figcaption><span>Terminal</span><button type="button" class="copy-btn"><span class="copy-idle"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg>Copier</span><span class="copy-done" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>Copié</span></button></figcaption><pre><code>dotnet build
+dotnet run --project src/DemoApp
+dotnet test</code></pre></figure><aside class="note"><p>L&#39;application de démo enveloppe <code>Checkout</code> dans un try/catch afin que le bogue de décalage d&#39;un cran apparaîsse comme une
+exception capturée au lieu de faire planter la présentation. Les tests sont aussi visibles dans la vue <strong>Testing</strong> (Test Explorer) de VS Code.</p>
+</aside>
+        </div>
+      </div>
+    </section>
+
+      <section class="part" id="partie-a" aria-labelledby="partie-a-title">
+        <header class="part-head">
+          <p class="part-letter" aria-hidden="true">A</p>
+          <div>
+            <p class="eyebrow">Partie A · 8 démos · 29 min</p>
+            <h2 id="partie-a-title">Utiliser GitHub Copilot dans l&#39;IDE</h2>
+          </div>
+        </header>
+        
+        <article class="demo" id="demo-1" data-demo="1" data-minutes="2" aria-labelledby="demo-1-title">
+          <header class="demo-head">
+            <span class="demo-num" aria-hidden="true">01</span>
+            <div class="demo-titles">
+              <p class="eyebrow">Démo 1 · 2 min</p>
+              <h3 id="demo-1-title" tabindex="-1">Activer et cadrer Copilot</h3>
+            </div>
+            <button type="button" class="done-btn" data-done="1" aria-pressed="false"><span class="done-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span>Terminée</button>
+          </header>
+          <div class="demo-body">
+<ul>
+<li>Cliquez sur l&#39;<strong>icône Copilot dans la barre d&#39;état</strong> (en bas à droite) : montrez l&#39;activation globale des suggestions en ligne, l&#39;activation pour le langage de l&#39;éditeur actif, et le bouton <strong>Snooze</strong> (pause de 5 minutes).</li>
+<li>Ouvrez <code class="file">.vscode/settings.json</code> et montrez le paramètre <code>github.copilot.enable</code> : Copilot est activé pour <code>*</code>, <code>csharp</code> et <code>markdown</code>, mais désactivé pour <code>plaintext</code> et <code>scminput</code>.</li>
+<li>Ouvrez un fichier <code>.txt</code> et montrez qu&#39;aucune suggestion n&#39;apparaît, puis revenez à un fichier <code>.cs</code>.</li>
+</ul>
+<aside class="takeaway"><p class="callout-label">Point de discussion</p><p>dans VS Code, l&#39;activation se gère par langage via <code>github.copilot.enable</code> (paramètres utilisateur ou d&#39;espace de travail) et le menu Copilot de la barre d&#39;état. Le paramètre d&#39;espace de travail est versionné avec le dépôt, donc partagé par toute l&#39;équipe.</p>
+</aside>
+          </div>
+          <footer class="demo-foot"><a class="next" href="#demo-2"><span>Suivante</span><strong>02 · Suggestions en ligne et Next Edit Suggestions</strong><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></footer>
+        </article>
+        <article class="demo" id="demo-2" data-demo="2" data-minutes="3" aria-labelledby="demo-2-title">
+          <header class="demo-head">
+            <span class="demo-num" aria-hidden="true">02</span>
+            <div class="demo-titles">
+              <p class="eyebrow">Démo 2 · 3 min</p>
+              <h3 id="demo-2-title" tabindex="-1">Suggestions en ligne et Next Edit Suggestions</h3>
+            </div>
+            <button type="button" class="done-btn" data-done="2" aria-pressed="false"><span class="done-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span>Terminée</button>
+          </header>
+          <div class="demo-body">
+<ul>
+<li><p>Dans <code class="file">src/ShoppingCart/Cart.cs</code>, placez le curseur à la fin de la classe <code>ShoppingCartModule</code> (après <code class="file">Cart.cs:58</code>, avant l&#39;accolade fermante <code>}</code> sur <code class="file">Cart.cs:59</code>) et tapez :</p>
+<figure class="codeblock"><figcaption><span>C#</span><button type="button" class="copy-btn"><span class="copy-idle"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg>Copier</span><span class="copy-done" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>Copié</span></button></figcaption><pre><code>// Returns the cart total in integer cents, including tax
+public static int TotalWithTax(Cart cart, double taxRate)</code></pre></figure></li>
+<li><p>Acceptez avec <span class="keys"><kbd>Tab</kbd></span> (ou rejetez avec <span class="keys"><kbd>Échap</kbd></span>). Survolez la suggestion pour afficher la barre d&#39;outils et parcourir les alternatives (<span class="keys"><kbd>Alt</kbd><span aria-hidden="true">+</span><kbd>]</kbd></span> / <span class="keys"><kbd>Alt</kbd><span aria-hidden="true">+</span><kbd>[</kbd></span>). Acceptez mot par mot avec <span class="keys"><kbd>Ctrl</kbd><span aria-hidden="true">+</span><kbd>→</kbd></span> (<span class="keys"><kbd>Cmd</kbd><span aria-hidden="true">+</span><kbd>→</kbd></span> sur macOS), ou ligne par ligne avec la commande <strong>Accept Next Line Of Inline Suggestion</strong> de la palette de commandes (<span class="keys"><kbd>Ctrl</kbd><span aria-hidden="true">+</span><kbd>Shift</kbd><span aria-hidden="true">+</span><kbd>P</kbd></span>).</p>
+</li>
+<li><p>Assurez-vous que Next Edit Suggestions est activé (<code>github.copilot.nextEditSuggestions.enabled</code> est à <code>true</code> dans <code class="file">.vscode/settings.json</code>), puis renommez la variable <code>total</code> dans <code>Subtotal</code> (déclarée sur <code class="file">Cart.cs:40</code>, utilisée sur <code class="file">Cart.cs:43</code> et <code class="file">Cart.cs:45</code>) en <code>runningTotal</code>. Une flèche apparaît dans la gouttière : appuyez sur <span class="keys"><kbd>Tab</kbd></span> pour sauter à la modification suivante, puis de nouveau sur <span class="keys"><kbd>Tab</kbd></span> pour l&#39;accepter, afin que les trois références soient mises à jour ensemble.</p>
+</li>
+</ul>
+<aside class="takeaway"><p class="callout-label">Point de discussion</p><p>les suggestions en texte fantôme, l&#39;acceptation partielle et NES (conscient des modifications récentes) sont des fonctionnalités distinctes ; NES signale la prochaine modification prédite par une flèche dans la gouttière, et <span class="keys"><kbd>Tab</kbd></span> permet d&#39;y naviguer puis de l&#39;accepter.</p>
+</aside>
+          </div>
+          <footer class="demo-foot"><a class="next" href="#demo-3"><span>Suivante</span><strong>03 · Chat en ligne et vue Chat</strong><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></footer>
+        </article>
+        <article class="demo" id="demo-3" data-demo="3" data-minutes="4" aria-labelledby="demo-3-title">
+          <header class="demo-head">
+            <span class="demo-num" aria-hidden="true">03</span>
+            <div class="demo-titles">
+              <p class="eyebrow">Démo 3 · 4 min</p>
+              <h3 id="demo-3-title" tabindex="-1">Chat en ligne et vue Chat</h3>
+            </div>
+            <button type="button" class="done-btn" data-done="3" aria-pressed="false"><span class="done-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span>Terminée</button>
+          </header>
+          <div class="demo-body">
+<ul>
+<li><p>Sélectionnez la méthode <code>Subtotal</code> (<code class="file">Cart.cs:38-46</code>), appuyez sur <span class="keys"><kbd>Ctrl</kbd><span aria-hidden="true">+</span><kbd>I</kbd></span> (<span class="keys"><kbd>Cmd</kbd><span aria-hidden="true">+</span><kbd>I</kbd></span> sur macOS) pour ouvrir le <strong>chat en ligne</strong>, et demandez :</p>
+<figure class="prompt"><figcaption><span>Prompt</span><button type="button" class="copy-btn" data-copy="Pourquoi cela lève-t-il une erreur à la dernière itération ? Corrige-le en conservant la même signature."><span class="copy-idle"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg>Copier</span><span class="copy-done" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>Copié</span></button></figcaption><blockquote><p>Pourquoi cela lève-t-il une erreur à la dernière itération ? Corrige-le en conservant la même signature.</p>
+</blockquote></figure><p>(Le décalage d&#39;un cran est la borne de boucle <code>i &lt;= cart.Items.Count</code> sur <code class="file">Cart.cs:41</code>.) Acceptez ou rejetez la modification directement dans l&#39;éditeur.</p>
+</li>
+<li><p>Montrez les <strong>actions intelligentes</strong> : clic droit sur la sélection &gt; <strong>Explain</strong>. Sur une ligne soulignée par une erreur du compilateur, l&#39;ampoule (<span class="keys"><kbd>Ctrl</kbd><span aria-hidden="true">+</span><kbd>.</kbd></span>) propose aussi <strong>Fix</strong>.</p>
+</li>
+<li><p>Ouvrez ensuite la <strong>vue Chat</strong> (<span class="keys"><kbd>Ctrl</kbd><span aria-hidden="true">+</span><kbd>Alt</kbd><span aria-hidden="true">+</span><kbd>I</kbd></span>), choisissez l&#39;agent <strong>Ask</strong> dans le sélecteur d&#39;agent, et exécutez, dans l&#39;ordre :</p>
+<ul>
+<li><button type="button" class="inline-prompt" data-copy="Explique ce que fait #Subtotal"><span class="sr-only">Copier : </span><code>Explique ce que fait #Subtotal</code><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg></button></li>
+<li><button type="button" class="inline-prompt" data-copy="#Checkout comporte un problème de sécurité : propose un correctif"><span class="sr-only">Copier : </span><code>#Checkout comporte un problème de sécurité : propose un correctif</code><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg></button> (<code class="file">Cart.cs:53-58</code>)</li>
+<li><button type="button" class="inline-prompt" data-copy="#codebase où le pourcentage de remise est-il appliqué ?"><span class="sr-only">Copier : </span><code>#codebase où le pourcentage de remise est-il appliqué ?</code><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg></button> (<code>ApplyDiscount</code> sur <code class="file">Cart.cs:48-50</code>, appelé depuis <code>Checkout</code> sur <code class="file">Cart.cs:55</code>)</li>
+<li><button type="button" class="inline-prompt" data-copy="#Cart.cs résume l&#39;API publique dans un tableau"><span class="sr-only">Copier : </span><code>#Cart.cs résume l&#39;API publique dans un tableau</code><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg></button></li>
+<li><code>/compact</code> pour résumer la conversation et libérer de la fenêtre de contexte</li>
+</ul>
+</li>
+</ul>
+<aside class="takeaway"><p class="callout-label">Point de discussion</p><p>dans VS Code, les briques du chat sont les agents intégrés (<strong>Ask</strong>, <strong>Agent</strong>, <strong>Plan</strong> via <code>/plan</code>), les références <code>#</code> pour attacher fichiers, symboles, dossiers ou outils (<code>#Cart.cs</code>, <code>#Subtotal</code>, <code>#codebase</code>, <code>#fetch</code>), le bouton <strong>Add Context</strong> (<code>+</code>), et les commandes slash (<code>/plan</code>, <code>/compact</code>, <code>/fork</code>, plus les skills installés). Les anciens participants <code>@workspace</code> / <code>@vscode</code> sont remplacés par <code>#codebase</code> et des questions directes. Soulignez les limites : la fenêtre de contexte est bornée et les requêtes consomment des crédits selon le modèle choisi.</p>
+</aside>
+          </div>
+          <footer class="demo-foot"><a class="next" href="#demo-4"><span>Suivante</span><strong>04 · Modifications multi-fichiers en mode Agent</strong><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></footer>
+        </article>
+        <article class="demo" id="demo-4" data-demo="4" data-minutes="4" aria-labelledby="demo-4-title">
+          <header class="demo-head">
+            <span class="demo-num" aria-hidden="true">04</span>
+            <div class="demo-titles">
+              <p class="eyebrow">Démo 4 · 4 min</p>
+              <h3 id="demo-4-title" tabindex="-1">Modifications multi-fichiers en mode Agent</h3>
+            </div>
+            <button type="button" class="done-btn" data-done="4" aria-pressed="false"><span class="done-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span>Terminée</button>
+          </header>
+          <div class="demo-body">
+<ul>
+<li><p>Dans la vue Chat, sélectionnez <strong>Copilot</strong> dans <strong>Session Target</strong>, l&#39;agent <strong>Agent</strong>, et <strong>Manual permissions</strong> dans le sélecteur de permissions. Ajoutez <code class="file">src/ShoppingCart/Cart.cs</code> et <code class="file">src/InventoryLegacy/InventoryLegacy.cs</code> comme contexte (bouton <strong>Add Context</strong> <code>+</code>, glisser-déposer, ou <button type="button" class="inline-prompt" data-copy="#Cart.cs #InventoryLegacy.cs"><span class="sr-only">Copier : </span><code>#Cart.cs #InventoryLegacy.cs</code><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg></button>).</p>
+</li>
+<li><p>Demandez :</p>
+<figure class="prompt"><figcaption><span>Prompt</span><button type="button" class="copy-btn" data-copy="La monnaie doit être gérée en centimes entiers dans les deux fichiers. Mets à jour le code et tous les appelants, et conserve inchangés les noms des méthodes publiques."><span class="copy-idle"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg>Copier</span><span class="copy-done" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>Copié</span></button></figcaption><blockquote><p>La monnaie doit être gérée en centimes entiers dans les deux fichiers. Mets à jour le code et tous les appelants,
+et conserve inchangés les noms des méthodes publiques.</p>
+</blockquote></figure><p>La monnaie utilise actuellement <code>double</code> à : <code class="file">Cart.cs:9</code> (<code>CartItem.Price</code>), <code class="file">Cart.cs:16</code> (<code>Cart.Discount</code>), <code class="file">Cart.cs:26-27</code> (<code>CheckoutResult.OrderId</code>/<code>Total</code>), et <code class="file">InventoryLegacy.cs:52-54</code> (<code>price_with_tax</code>).</p>
+</li>
+<li><p>Développez le <strong>working set</strong> au-dessus de la zone de saisie : ouvrez chaque fichier modifié pour voir son diff, utilisez <strong>Keep</strong> sur certains et <strong>Undo</strong> sur d&#39;autres, puis survolez la requête et sélectionnez <strong>Restore Checkpoint</strong> pour tout annuler.</p>
+</li>
+</ul>
+<aside class="takeaway"><p class="callout-label">Point de discussion</p><p>le mode Agent planifie le changement, modifie plusieurs fichiers et vérifie le résultat. Les modifications sont déjà enregistrées sur disque ; <strong>Keep</strong>/<strong>Undo</strong> et les points de contrôle (checkpoints) gardent le tout réversible. Les points de contrôle n&#39;annulent pas les commandes de terminal.</p>
+</aside>
+          </div>
+          <footer class="demo-foot"><a class="next" href="#demo-5"><span>Suivante</span><strong>05 · Mode agent de bout en bout</strong><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></footer>
+        </article>
+        <article class="demo" id="demo-5" data-demo="5" data-minutes="5" aria-labelledby="demo-5-title">
+          <header class="demo-head">
+            <span class="demo-num" aria-hidden="true">05</span>
+            <div class="demo-titles">
+              <p class="eyebrow">Démo 5 · 5 min</p>
+              <h3 id="demo-5-title" tabindex="-1">Mode agent de bout en bout</h3>
+            </div>
+            <button type="button" class="done-btn" data-done="5" aria-pressed="false"><span class="done-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span>Terminée</button>
+          </header>
+          <div class="demo-body">
+<ul>
+<li><p>Commencez par planifier : <button type="button" class="inline-prompt" data-copy="/plan Ajouter une suite de tests xUnit pour src/InventoryLegacy"><span class="sr-only">Copier : </span><code>/plan Ajouter une suite de tests xUnit pour src/InventoryLegacy</code><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg></button>, et passez le plan en revue.</p>
+</li>
+<li><p>Puis, avec l&#39;agent <strong>Agent</strong>, demandez :</p>
+<figure class="prompt"><figcaption><span>Prompt</span><button type="button" class="copy-btn" data-copy="Ajoute une suite de tests xUnit pour src/InventoryLegacy, crée la structure du projet de tests si nécessaire, exécute dotnet test, et corrige tout ce qui échoue."><span class="copy-idle"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg>Copier</span><span class="copy-done" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>Copié</span></button></figcaption><blockquote><p>Ajoute une suite de tests xUnit pour src/InventoryLegacy, crée la structure du projet de tests si nécessaire,
+exécute <code>dotnet test</code>, et corrige tout ce qui échoue.</p>
+</blockquote></figure><p>Bonnes méthodes à cibler : <code>get_stock</code> (<code class="file">InventoryLegacy.cs:13-21</code>), <code>adjust</code> (<code class="file">InventoryLegacy.cs:23-33</code>), <code>reorder_report</code> (<code class="file">InventoryLegacy.cs:35-50</code>), et <code>price_with_tax</code> (<code class="file">InventoryLegacy.cs:52-54</code>).</p>
+</li>
+<li><p>Laissez-le planifier, modifier les fichiers, et demander l&#39;approbation du terminal. Montrez l&#39;invite d&#39;approbation d&#39;outil (en <strong>Manual permissions</strong>), puis les nouveaux tests dans la vue <strong>Testing</strong>.</p>
+</li>
+<li><p>Variante avec un skill : tapez <button type="button" class="inline-prompt" data-copy="/unit-tests #Cart.cs"><span class="sr-only">Copier : </span><code>/unit-tests #Cart.cs</code><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg></button> pour invoquer le skill <code class="file">.github/skills/unit-tests/SKILL.md</code>.</p>
+</li>
+</ul>
+<aside class="takeaway"><p class="callout-label">Point de discussion</p><p>le mode agent choisit ses propres fichiers et outils, itère sur les échecs, et
+demande avant d&#39;exécuter des commandes selon le niveau de permission choisi (<strong>Manual</strong>, <strong>Assisted</strong>, …). Les instructions
+(<code class="file">.github/copilot-instructions.md</code>, <code>*.instructions.md</code>) s&#39;appliquent automatiquement ; les skills sont chargés à la demande.</p>
+</aside>
+          </div>
+          <footer class="demo-foot"><a class="next" href="#demo-6"><span>Suivante</span><strong>06 · MCP en mode agent</strong><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></footer>
+        </article>
+        <article class="demo" id="demo-6" data-demo="6" data-minutes="3" aria-labelledby="demo-6-title">
+          <header class="demo-head">
+            <span class="demo-num" aria-hidden="true">06</span>
+            <div class="demo-titles">
+              <p class="eyebrow">Démo 6 · 3 min</p>
+              <h3 id="demo-6-title" tabindex="-1">MCP en mode agent</h3>
+            </div>
+            <button type="button" class="done-btn" data-done="6" aria-pressed="false"><span class="done-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span>Terminée</button>
+          </header>
+          <div class="demo-body">
+<ul>
+<li><p>Ouvrez <code class="file">.mcp.json</code> à la racine du dépôt : il déclare le serveur MCP <strong>GitHub</strong> (<code>https://api.githubcopilot.com/mcp/</code>) et le serveur <strong>Microsoft Learn</strong> (<code>https://learn.microsoft.com/api/mcp</code>) sous la clé <code>mcpServers</code>. Aucun jeton n&#39;est stocké dans le fichier : l&#39;authentification GitHub se fait par OAuth au premier usage.</p>
+</li>
+<li><p>Exécutez <strong>Chat: Open Customizations</strong> (<span class="keys"><kbd>Ctrl</kbd><span aria-hidden="true">+</span><kbd>Shift</kbd><span aria-hidden="true">+</span><kbd>P</kbd></span>) &gt; <strong>MCP Servers</strong> : montrez les deux serveurs de l&#39;espace de travail, acceptez la demande de confiance, puis ouvrez l&#39;onglet <strong>Tools</strong> pour voir les outils fournis par MCP et les activer ou désactiver.</p>
+</li>
+<li><p>Dans la vue Chat (agent <strong>Agent</strong>), demandez :</p>
+<figure class="prompt"><figcaption><span>Prompt</span><button type="button" class="copy-btn" data-copy="À l&#39;aide des outils GitHub, liste les problèmes ouverts de ce dépôt et rédige un plan de correction pour le plus ancien."><span class="copy-idle"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg>Copier</span><span class="copy-done" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>Copié</span></button></figcaption><blockquote><p>À l&#39;aide des outils GitHub, liste les problèmes ouverts de ce dépôt et rédige un plan de correction pour
+le plus ancien.</p>
+</blockquote></figure><p>puis :</p>
+<figure class="prompt"><figcaption><span>Prompt</span><button type="button" class="copy-btn" data-copy="Utilise les outils Microsoft Learn pour trouver la documentation officielle de SqliteParameter et montre comment corriger l&#39;injection SQL de get_stock. Ne modifie aucun fichier."><span class="copy-idle"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg>Copier</span><span class="copy-done" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>Copié</span></button></figcaption><blockquote><p>Utilise les outils Microsoft Learn pour trouver la documentation officielle de <code>SqliteParameter</code> et montre comment corriger l&#39;injection SQL de <code>get_stock</code>. Ne modifie aucun fichier.</p>
+</blockquote></figure></li>
+<li><p>Développez l&#39;appel d&#39;outil dans la conversation pour montrer quel serveur a répondu.</p>
+</li>
+</ul>
+<aside class="takeaway"><p class="callout-label">Point de discussion</p><p>MCP étend le mode agent avec des systèmes externes via un protocole ouvert ; les serveurs sont configurés par espace de travail (<code class="file">.mcp.json</code>) ou par utilisateur (<strong>Copilot Global</strong>, partagé avec Copilot CLI), les outils se gèrent dans l&#39;onglet <strong>Tools</strong>, et les appels d&#39;outils sont soumis à approbation. Ne versionnez jamais de jetons dans <code class="file">.mcp.json</code>.</p>
+</aside>
+          </div>
+          <footer class="demo-foot"><a class="next" href="#demo-7"><span>Suivante</span><strong>07 · Sessions d&#39;agent, Agents window et délégation</strong><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></footer>
+        </article>
+        <article class="demo" id="demo-7" data-demo="7" data-minutes="3" aria-labelledby="demo-7-title">
+          <header class="demo-head">
+            <span class="demo-num" aria-hidden="true">07</span>
+            <div class="demo-titles">
+              <p class="eyebrow">Démo 7 · 3 min</p>
+              <h3 id="demo-7-title" tabindex="-1">Sessions d&#39;agent, Agents window et délégation</h3>
+            </div>
+            <button type="button" class="done-btn" data-done="7" aria-pressed="false"><span class="done-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span>Terminée</button>
+          </header>
+          <div class="demo-body">
+<ul>
+<li><p>Sélectionnez <strong>Open in Agents</strong> dans la barre de titre de VS Code (ou <strong>Chat: Open Agents window</strong>) pour ouvrir l&#39;<strong>Agents window</strong>.</p>
+</li>
+<li><p>Démarrez une <strong>New Session</strong>, choisissez l&#39;environnement <strong>Cloud</strong> puis ce dépôt avec <strong>Choose Repository...</strong> (le paramètre <code>chat.agentHost.cloudSandbox.enabled</code> est activé dans <code class="file">.vscode/settings.json</code>), et déléguez :</p>
+<figure class="prompt"><figcaption><span>Prompt</span><button type="button" class="copy-btn" data-copy="Corrige le bogue de décalage d&#39;un cran dans Subtotal(), exécute dotnet test, et ouvre une pull request."><span class="copy-idle"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg>Copier</span><span class="copy-done" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>Copié</span></button></figcaption><blockquote><p>Corrige le bogue de décalage d&#39;un cran dans Subtotal(), exécute <code>dotnet test</code>, et ouvre une pull request.</p>
+</blockquote></figure><p>Variante depuis la vue Chat : <strong>Session Target</strong> &gt; <strong>Cloud</strong>. Variante sur github.com : ouvrez le panneau Agents (ou assignez un problème à Copilot).</p>
+</li>
+<li><p>Pendant que la session cloud travaille, démarrez une seconde session locale avec <strong>New Worktree</strong> pour montrer deux tâches parallèles isolées. Montrez le journal de session, les modifications dans <strong>Changes</strong>, la branche créée et la PR brouillon.</p>
+</li>
+<li><p>Mentionnez les sous-agents : demandez « utilise un sous-agent pour lister tous les appels à <code>Console.WriteLine</code> » ; la session délègue cette unité de travail afin que la fenêtre de contexte principale ne soit pas consommée par des tâches annexes.</p>
+</li>
+</ul>
+<aside class="takeaway"><p class="callout-label">Point de discussion</p><p>les sessions cloud s&#39;exécutent sur une infrastructure gérée, sans garder votre machine allumée ; vous vous y reconnectez depuis VS Code ou Copilot CLI et examinez la PR comme
+tout autre contributeur.</p>
+</aside>
+          </div>
+          <footer class="demo-foot"><a class="next" href="#demo-8"><span>Suivante</span><strong>08 · Copilot CLI</strong><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></footer>
+        </article>
+        <article class="demo" id="demo-8" data-demo="8" data-minutes="5" aria-labelledby="demo-8-title">
+          <header class="demo-head">
+            <span class="demo-num" aria-hidden="true">08</span>
+            <div class="demo-titles">
+              <p class="eyebrow">Démo 8 · 5 min</p>
+              <h3 id="demo-8-title" tabindex="-1">Copilot CLI</h3>
+            </div>
+            <button type="button" class="done-btn" data-done="8" aria-pressed="false"><span class="done-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span>Terminée</button>
+          </header>
+          <div class="demo-body">
+<ul>
+<li><p>Dans le terminal intégré de VS Code (<span class="keys"><kbd>Ctrl</kbd><span aria-hidden="true">+</span><kbd>`</kbd></span>) à la racine du dépôt, démarrez une session interactive (ou ouvrez le profil de terminal <strong>GitHub Copilot CLI</strong>, ou exécutez <strong>Chat: New Copilot CLI Session</strong>) :</p>
+<figure class="codeblock"><figcaption><span>Terminal</span><button type="button" class="copy-btn"><span class="copy-idle"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg>Copier</span><span class="copy-done" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>Copié</span></button></figcaption><pre><code>copilot                       # session interactive</code></pre></figure></li>
+<li><p>Dans la session, explorez les commandes :</p>
+<ul>
+<li><code>/help</code>, <code>/model</code>, <code>/clear</code>, <code>/session</code>, <code>/exit</code></li>
+<li><code>/skills</code> et <code>/mcp</code> : la CLI réutilise les skills (<code class="file">.github/skills/</code>) et les instructions du dépôt, comme VS Code</li>
+</ul>
+</li>
+<li><p>Puis essayez quelques demandes :</p>
+<ul>
+<li><button type="button" class="inline-prompt" data-copy="explique ce que fait src/InventoryLegacy/InventoryLegacy.cs et liste ses risques"><span class="sr-only">Copier : </span><code>explique ce que fait src/InventoryLegacy/InventoryLegacy.cs et liste ses risques</code><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg></button></li>
+<li><button type="button" class="inline-prompt" data-copy="écris un script PowerShell qui sauvegarde chaque fichier .cs dans backups/ avec un horodatage, puis exécute-le"><span class="sr-only">Copier : </span><code>écris un script PowerShell qui sauvegarde chaque fichier .cs dans backups/ avec un horodatage, puis exécute-le</code><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg></button></li>
+<li><button type="button" class="inline-prompt" data-copy="renomme src/ShoppingCart/Cart.cs en src/ShoppingCart/ShoppingCart.cs et mets à jour les références d&#39;espace de noms"><span class="sr-only">Copier : </span><code>renomme src/ShoppingCart/Cart.cs en src/ShoppingCart/ShoppingCart.cs et mets à jour les références d&#39;espace de noms</code><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg></button></li>
+</ul>
+</li>
+<li><p>Ou exécutez de manière non interactive :</p>
+<figure class="codeblock"><figcaption><span>Terminal</span><button type="button" class="copy-btn"><span class="copy-idle"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg>Copier</span><span class="copy-done" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>Copié</span></button></figcaption><pre><code>copilot -p &quot;génère un .gitignore pour un projet .NET et Node&quot;</code></pre></figure></li>
+</ul>
+<aside class="takeaway"><p class="callout-label">Point de discussion</p><p>la CLI apporte Copilot au terminal pour ceux qui ne vivent pas dans un
+IDE et partage le même moteur (Copilot SDK) que le harnais Copilot de VS Code — elle peut expliquer des commandes, générer des scripts et agir sur des fichiers, et elle demande l&#39;approbation
+avant de modifier quoi que ce soit.</p>
+</aside>
+          </div>
+          <footer class="demo-foot"><a class="next" href="#demo-9"><span>Suivante</span><strong>09 · Revue de code et normes de revue personnalisées</strong><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></footer>
+        </article>
+      </section>
+      <section class="part" id="partie-b" aria-labelledby="partie-b-title">
+        <header class="part-head">
+          <p class="part-letter" aria-hidden="true">B</p>
+          <div>
+            <p class="eyebrow">Partie B · 2 démos · 7 min</p>
+            <h2 id="partie-b-title">Revue de code, collaboration et paramètres d&#39;organisation</h2>
+          </div>
+        </header>
+        
+        <article class="demo" id="demo-9" data-demo="9" data-minutes="4" aria-labelledby="demo-9-title">
+          <header class="demo-head">
+            <span class="demo-num" aria-hidden="true">09</span>
+            <div class="demo-titles">
+              <p class="eyebrow">Démo 9 · 4 min</p>
+              <h3 id="demo-9-title" tabindex="-1">Revue de code et normes de revue personnalisées</h3>
+            </div>
+            <button type="button" class="done-btn" data-done="9" aria-pressed="false"><span class="done-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span>Terminée</button>
+          </header>
+          <div class="demo-body">
+<ul>
+<li>Dans <code class="file">src/ShoppingCart/Cart.cs</code>, sélectionnez <code>Checkout</code> (<code class="file">Cart.cs:53-58</code>) &gt; clic droit &gt; <strong>Review</strong> pour obtenir des commentaires de revue en ligne dans l&#39;éditeur et dans le panneau <strong>Comments</strong>. Attendez-vous à un signalement sur le numéro de carte journalisé (<code class="file">Cart.cs:56</code>). Appliquez ou ignorez chaque suggestion.</li>
+<li>Modifiez un fichier, puis dans la vue <strong>Source Control</strong> (<span class="keys"><kbd>Ctrl</kbd><span aria-hidden="true">+</span><kbd>Shift</kbd><span aria-hidden="true">+</span><kbd>G</kbd></span>), survolez <strong>Changes</strong> et sélectionnez <strong>Code Review - Unstaged Changes</strong> pour examiner les modifications locales avant de valider. Générez ensuite le message de commit avec l&#39;icône étincelle.</li>
+<li>Ouvrez <code class="file">.github/copilot-instructions.md</code>, montrez la section Normes de revue, puis montrez dans <code class="file">.vscode/settings.json</code> que <code>github.copilot.chat.reviewSelection.instructions</code> pointe vers ce fichier. Modifiez une consigne et relancez la revue pour démontrer qu&#39;elle change les commentaires.</li>
+<li>Sur github.com, demandez une revue à Copilot sur une pull request (elle lit aussi <code class="file">.github/copilot-instructions.md</code>).</li>
+</ul>
+<aside class="takeaway"><p class="callout-label">Point de discussion</p><p>les normes de revue sont pilotées par un fichier d&#39;instructions versionné, de sorte que la sortie de revue est
+cohérente dans toute l&#39;équipe, dans l&#39;IDE comme sur github.com. Pour une revue de sécurité approfondie, invoquez le skill <button type="button" class="inline-prompt" data-copy="/security-review #InventoryLegacy.cs"><span class="sr-only">Copier : </span><code>/security-review #InventoryLegacy.cs</code><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg></button>.</p>
+</aside>
+          </div>
+          <footer class="demo-foot"><a class="next" href="#demo-10"><span>Suivante</span><strong>10 · Résumés de PR, Spaces et Spark</strong><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></footer>
+        </article>
+        <article class="demo" id="demo-10" data-demo="10" data-minutes="3" aria-labelledby="demo-10-title">
+          <header class="demo-head">
+            <span class="demo-num" aria-hidden="true">10</span>
+            <div class="demo-titles">
+              <p class="eyebrow">Démo 10 · 3 min</p>
+              <h3 id="demo-10-title" tabindex="-1">Résumés de PR, Spaces et Spark</h3>
+            </div>
+            <button type="button" class="done-btn" data-done="10" aria-pressed="false"><span class="done-box" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span>Terminée</button>
+          </header>
+          <div class="demo-body">
+<ul>
+<li>Sur une PR ouverte sur github.com, utilisez Copilot &gt; Générer un résumé et montrez la présentation qu&#39;il rédige. Dans VS Code, avec l&#39;extension <strong>GitHub Pull Requests</strong>, l&#39;icône étincelle à côté du titre génère le titre et la description d&#39;une nouvelle PR.</li>
+<li>Ouvrez un Copilot Space, attachez ce dépôt plus le lien du guide d&#39;étude, et posez une question qui nécessite les deux.</li>
+<li>Dans Spark, décrivez un petit tableau de bord d&#39;inventaire et laissez-le construire et déployer l&#39;application.</li>
+</ul>
+<aside class="takeaway"><p class="callout-label">Point de discussion</p><p>les Spaces sont un contexte organisé et partageable ; Spark va du prompt à l&#39;application en cours d&#39;exécution.</p>
+</aside>
+          </div>
+          <footer class="demo-foot"><a class="next" href="#annexe"><span>Fin de l’atelier</span><strong>Annexe · Le kit</strong><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></footer>
+        </article>
+      </section>
+
+    <section class="annex" id="annexe" aria-labelledby="annexe-title">
+      <p class="eyebrow">Annexe</p>
+      <h2 id="annexe-title">Le kit en détail</h2>
+      <h3>Disposition de la solution</h3>
+<figure class="codeblock"><figcaption><span>Terminal</span><button type="button" class="copy-btn"><span class="copy-idle"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5"/></svg>Copier</span><span class="copy-done" aria-hidden="true"><svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>Copié</span></button></figcaption><pre><code>CopilotDemoKit.sln
+├─ src/
+│  ├─ ShoppingCart/        ShoppingCart/Cart.cs
+│  ├─ InventoryLegacy/     InventoryLegacy/InventoryLegacy.cs
+│  └─ DemoApp/             Program.cs — pilote qui exerce les deux modules
+├─ tests/
+│  └─ ShoppingCart.Tests/  volontairement minimal — le manque « aucun test » pour la démo des tests
+├─ .github/
+│  ├─ copilot-instructions.md
+│  ├─ instructions/csharp.instructions.md
+│  ├─ skills/{security-review,unit-tests}/SKILL.md
+│  └─ workflows/workshop-site.yml  vérifie que docs/index.html est à jour
+├─ docs/index.html         guide d&#39;atelier publié par GitHub Pages (généré depuis ce README)
+├─ tools/workshop-site/    générateur du guide d&#39;atelier
+├─ .vscode/{settings.json,extensions.json}
+├─ .mcp.json               serveurs MCP partagés avec l&#39;espace de travail
+├─ admin/content-exclusion-example.yml
+└─ global.json  (épingle le SDK .NET 8)</code></pre></figure>
+      <h3>Fichiers de ce kit</h3>
+<div class="table-wrap" role="region" tabindex="0" aria-label="Tableau défilant"><table>
+<thead>
+<tr>
+<th>Chemin</th>
+<th>Ce qu&#39;il démontre</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code class="file">src/ShoppingCart/Cart.cs</code></td>
+<td>Bogue de décalage d&#39;un cran, numéro de carte journalisé, monnaie en <code>double</code>, aucun test — suggestions en ligne, chat en ligne, revue, tests</td>
+</tr>
+<tr>
+<td><code class="file">src/InventoryLegacy/InventoryLegacy.cs</code></td>
+<td>Injection SQL, aucun type/documentation — modernisation, refactorisation, sécurité, documentation</td>
+</tr>
+<tr>
+<td><code class="file">.github/copilot-instructions.md</code></td>
+<td>Instructions personnalisées à l&#39;échelle du dépôt (aussi utilisées pour la revue de sélection)</td>
+</tr>
+<tr>
+<td><code class="file">.github/instructions/csharp.instructions.md</code></td>
+<td>Instructions ciblées par chemin via <code>applyTo</code></td>
+</tr>
+<tr>
+<td><code class="file">.github/skills/*/SKILL.md</code></td>
+<td>Skills d&#39;agent réutilisables, invoqués comme commandes slash (<code>/unit-tests</code>, <code>/security-review</code>)</td>
+</tr>
+<tr>
+<td><code class="file">.vscode/settings.json</code></td>
+<td>Activation de Copilot par langage, Next Edit Suggestions, instructions de revue, sessions cloud</td>
+</tr>
+<tr>
+<td><code class="file">.vscode/extensions.json</code></td>
+<td>Extensions recommandées (Copilot Chat, C# Dev Kit)</td>
+</tr>
+<tr>
+<td><code class="file">.mcp.json</code></td>
+<td>Serveurs MCP de l&#39;espace de travail (GitHub, Microsoft Learn) au format portable <code>mcpServers</code></td>
+</tr>
+<tr>
+<td><code class="file">admin/content-exclusion-example.yml</code></td>
+<td>Syntaxe d&#39;exclusion de contenu</td>
+</tr>
+<tr>
+<td><code>tools/workshop-site/build.mjs</code></td>
+<td>Génère le guide d&#39;atelier <code>docs/index.html</code> (GitHub Pages) à partir de ce README</td>
+</tr>
+</tbody></table></div>
+<aside class="note"><p class="callout-label">Note</p><p><strong>Héritage :</strong> les fichiers de prompt (<code class="file">.github/prompts/*.prompt.md</code>) et <code class="file">.vscode/mcp.json</code> (clé <code>servers</code>) ne fonctionnent
+qu&#39;avec le harnais <strong>Local</strong> de VS Code, déprécié et retiré d&#39;ici février 2027. Ce kit utilise leurs remplaçants :
+les <strong>skills</strong> (<code class="file">.github/skills/</code>) et le fichier <code class="file">.mcp.json</code> à la racine. La commande <strong>Chat: Open Customizations</strong> &gt; <strong>Migrations</strong>
+convertit d&#39;anciens fichiers de prompt en skills.</p>
+</aside>
+    </section>
+  </main>
+</div>
+<div class="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const KEY = 'gh300-companion';
+  const root = document.documentElement;
+  const read = () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+      return {
+        done: Array.isArray(saved.done) ? saved.done.map(String) : [],
+        prep: Array.isArray(saved.prep) ? saved.prep.map(String) : [],
+        projection: saved.projection === true,
+      };
+    } catch {
+      return { done: [], prep: [], projection: false };
+    }
+  };
+  const state = read();
+  const save = () => {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* storage unavailable: keep in-memory state */ }
+  };
+
+  const demos = [...document.querySelectorAll('.demo')];
+  const minutes = Object.fromEntries(demos.map((d) => [d.dataset.demo, Number(d.dataset.minutes)]));
+  const minutesDone = document.querySelector('[data-minutes-done]');
+  const toast = document.querySelector('.toast');
+  let toastTimer;
+
+  function announce(message) {
+    toast.textContent = message;
+    toast.setAttribute('data-show', '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.removeAttribute('data-show'), 1800);
+  }
+
+  function renderProgress() {
+    const done = new Set(state.done);
+    demos.forEach((demo) => {
+      const on = done.has(demo.dataset.demo);
+      demo.toggleAttribute('data-done', on);
+      demo.querySelector('.done-btn').setAttribute('aria-pressed', String(on));
+    });
+    document.querySelectorAll('[data-nav-demo]').forEach((link) => {
+      const on = done.has(link.dataset.navDemo);
+      link.toggleAttribute('data-done', on);
+      if (link.dataset.label) link.setAttribute('aria-label', link.dataset.label + (on ? ' (terminée)' : ''));
+    });
+    minutesDone.textContent = String(state.done.reduce((sum, id) => sum + (minutes[id] || 0), 0));
+    document.querySelectorAll('[data-prep]').forEach((box) => { box.checked = state.prep.includes(box.dataset.prep); });
+  }
+
+  document.addEventListener('click', (event) => {
+    const doneBtn = event.target.closest('.done-btn');
+    if (doneBtn) {
+      const id = doneBtn.dataset.done;
+      state.done = state.done.includes(id) ? state.done.filter((x) => x !== id) : [...state.done, id];
+      save();
+      renderProgress();
+    }
+  });
+
+  document.addEventListener('change', (event) => {
+    const box = event.target.closest('[data-prep]');
+    if (!box) return;
+    state.prep = box.checked ? [...new Set([...state.prep, box.dataset.prep])] : state.prep.filter((x) => x !== box.dataset.prep);
+    save();
+  });
+
+  // Theme and projection
+  const themeButtons = document.querySelectorAll('[data-set-theme]');
+  const syncTheme = () => themeButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.setTheme === root.dataset.theme)));
+  themeButtons.forEach((button) => button.addEventListener('click', () => {
+    root.dataset.theme = button.dataset.setTheme;
+    try { localStorage.setItem('page-theme', button.dataset.setTheme); } catch { /* ignore */ }
+    syncTheme();
+  }));
+  syncTheme();
+
+  const projectionBtn = document.querySelector('[data-projection]');
+  const syncProjection = () => {
+    root.classList.toggle('projection', state.projection);
+    projectionBtn.setAttribute('aria-pressed', String(state.projection));
+  };
+  projectionBtn.addEventListener('click', () => {
+    state.projection = !state.projection;
+    save();
+    syncProjection();
+  });
+  syncProjection();
+
+  // Copy: prompts, inline prompts and code blocks
+  async function copyText(text, source) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(source);
+      const selection = getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return false;
+    }
+  }
+  document.addEventListener('click', async (event) => {
+    const button = event.target.closest('.copy-btn, .inline-prompt');
+    if (!button) return;
+    const block = button.closest('.codeblock, .prompt');
+    const source = button.classList.contains('inline-prompt') ? button.querySelector('code') : block.querySelector('code, blockquote');
+    const text = button.dataset.copy ?? source.textContent.replace(/\n$/, '');
+    const ok = await copyText(text, source);
+    if (ok) {
+      button.setAttribute('data-copied', '');
+      setTimeout(() => button.removeAttribute('data-copied'), 1400);
+      announce('Copié dans le presse-papiers');
+    } else {
+      announce('Copie bloquée : texte sélectionné, utilisez Ctrl+C');
+    }
+  });
+
+  // Scroll spy: highlights the current demo in the rail and the agenda strip
+  const navLinks = [...document.querySelectorAll('[data-nav-demo], [data-nav-section]')];
+  const setCurrent = (id) => navLinks.forEach((link) => {
+    const target = link.dataset.navDemo ? 'demo-' + link.dataset.navDemo : link.dataset.navSection;
+    if (target === id) link.setAttribute('aria-current', 'location');
+    else link.removeAttribute('aria-current');
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => { if (entry.isIntersecting) setCurrent(entry.target.id); });
+  }, { rootMargin: '-30% 0px -65% 0px' });
+  [document.getElementById('preparation'), ...demos, document.getElementById('annexe')].forEach((el) => observer.observe(el));
+
+  // J / K jump between demos instantly (keyboard actions are never animated)
+  document.addEventListener('keydown', (event) => {
+    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    const key = event.key.toLowerCase();
+    if (key !== 'j' && key !== 'k') return;
+    const offset = document.querySelector('.bar').offsetHeight + 4;
+    const target = key === 'j'
+      ? demos.find((d) => d.getBoundingClientRect().top > offset)
+      : demos.filter((d) => d.getBoundingClientRect().top < offset - 8).pop();
+    if (!target) return;
+    event.preventDefault();
+    target.scrollIntoView({ behavior: 'instant', block: 'start' });
+    target.querySelector('h3').focus({ preventScroll: true });
+    history.replaceState(null, '', '#' + target.id);
+  });
+
+  renderProgress();
+})();
+</script>
+</body>
+</html>
