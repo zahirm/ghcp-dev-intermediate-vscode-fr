@@ -1,0 +1,38 @@
+name: Workshop site
+
+on:
+  pull_request:
+    paths:
+      - README.md
+      - docs/index.html
+      - tools/workshop-site/**
+      - .github/workflows/workshop-site.yml
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - docs/index.html
+      - tools/workshop-site/**
+      - .github/workflows/workshop-site.yml
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: docs/index.html is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Rebuild the workshop guide from README.md
+        run: node tools/workshop-site/build.mjs
+      - name: Fail if the committed page is stale
+        run: |
+          if ! git diff --quiet -- docs/index.html; then
+            echo "::error file=docs/index.html::docs/index.html is out of date. Run 'node tools/workshop-site/build.mjs' and commit the result."
+            git --no-pager diff --stat -- docs/index.html
+            exit 1
+          fi
